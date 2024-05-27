@@ -1,12 +1,9 @@
 {
   "name": "CMPFacades",
-  "directories": {
-    "train_raw": "raw/train",
-    "test_raw": "raw/test",
-    "val_raw": "raw/val",
-    "train_data": "datasets/train_data.pkl",
-    "test_data": "datasets/test_data.pkl",
-    "val_data": "datasets/val_data.pkl",
+  "paths": {
+    "train_data": "train_data.pkl",
+    "test_data": "test_data.pkl",
+    "val_data": "val_data.pkl",
   },
   
   "columns": [
