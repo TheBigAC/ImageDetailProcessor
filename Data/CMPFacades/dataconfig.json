@@ -3,7 +3,7 @@
   "paths": {
     "train_data": "train_data.pkl",
     "test_data": "test_data.pkl",
-    "val_data": "val_data.pkl",
+    "val_data": "val_data.pkl"
   },
   
   "columns": [
@@ -11,13 +11,13 @@
       "column_name": "color_labels",
       "item_format": "tf_tensor_slices",
       "dimensions": [256, 256, 3],
-      "color_format": "RGB0-1",
+      "color_format": "RGB0-1"
     },
     {
       "column_name": "facades",
       "item_format": "tf_tensor_slices",
       "dimensions": [256, 256, 3],
-      "color_format": "RGB0-1",
-    },
+      "color_format": "RGB0-1"
+    }
   ]
 }
