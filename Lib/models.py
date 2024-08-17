@@ -155,3 +155,41 @@ class WGAN(tf.keras.Model):
         else:
             proscessed_image = self.generator(image)
         return proscessed_image
+    
+    def train_step(self, data):
+        images_list = self.database[self.index]
+        images = data
+        real_images = tf.dtypes.cast(images, tf.float32)
+        epsilon = tf.random.uniform(shape=[tf.shape(real_images)[0], 1, 1, 1], minval=0, maxval=1)
+
+
+        with tf.GradientTape(persistent=True) as c_tape:
+            with tf.GradientTape() as gp_tape:
+                fake_images = self.generator(images, training=True)
+                fake_image_mixed = real_images + epsilon * (fake_images - real_images)
+                yhat_mixed = self.critic(fake_image_mixed, training=True)
+
+                grads = gp_tape.gradient(yhat_mixed, fake_image_mixed)
+            grads_norm = tf.sqrt(tf.reduce_sum(tf.square(grads), axis=[1, 2, 3]))
+            gradient_penalty = tf.reduce_mean(tf.square(grads_norm - 1))
+            yhat_real = self.critic(real_images, training=True)
+            yhat_fake = self.critic(fake_images, training=True)
+            total_c_loss = tf.reduce_mean(yhat_real) - tf.reduce_mean(yhat_fake) + gradient_penalty
+
+            cgrad = c_tape.gradient(total_c_loss, self.critic.trainable_variables)
+            self.c_opt.apply_gradients(zip(cgrad, self.critic.trainable_variables))
+
+        with tf.GradientTape() as g_tape:
+            gen_images = self.generator(images, training=True)
+            predicted_labels = self.critic(gen_images, training=True)
+            critic_g_loss = tf.reduce_mean(predicted_labels)
+            detail_images = []
+        for i in range(len(images_list)):
+            single_image = self.generator(tf.expand_dims(images_list[i], axis=0), training=True)
+            detail_images.append(single_image)
+        detail_g_loss = self.shannon_entropy(detail_images) * self.detail_weight
+        total_g_loss = detail_g_loss + critic_g_loss
+        ggrad = g_tape.gradient((total_g_loss), self.generator.trainable_variables)
+        self.g_opt.apply_gradients(zip(ggrad, self.generator.trainable_variables))
+
+        return {"c_loss":total_c_loss, "g_loss": total_g_loss, "critic_g_loss": critic_g_loss, "detail_g_loss": detail_g_loss}
