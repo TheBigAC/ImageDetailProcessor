@@ -155,7 +155,21 @@ class WGAN(tf.keras.Model):
         else:
             proscessed_image = self.generator(image)
         return proscessed_image
-    
+    def shannon_entropy(self, images):
+        entropies = []
+        for image in images:
+            image = (tf.image.rgb_to_grayscale((image  / 2) + 0.5) * 255)
+            image = image.numpy()
+            p_hist, bin_edges = np.histogram(image, bins=256, range=(0, 255))
+            p_hist = p_hist / np.sum(p_hist)
+            p_array = np.digitize(image, bins=bin_edges)
+            p = p_hist[p_array.flatten() - 1]
+            p = tf.convert_to_tensor(p)
+            p = tf.cast(p, dtype=tf.float32)
+            entropy = -tf.reduce_sum(p * tf.math.log(p))
+            entropies.append(entropy)
+        loss = tf.reduce_mean(entropies)
+        return loss
     def train_step(self, data):
         images_list = self.database[self.index]
         images = data
