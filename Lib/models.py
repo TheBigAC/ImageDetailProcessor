@@ -15,7 +15,10 @@ class WGAN(tf.keras.Model):
         critic_weights = kwargs.pop("critic_weights", None)
         if critic_weights is not None:
             self.critic.load_weights(critic_weights)
-
+        detail_weight = kwargs.pop("detail_weight", None)
+        if detail_weight is not None:
+            self.detail_weight = 0.005
+        
     def compile(self, d_optimizer, g_optimizer):
         self.d_optimizer = d_optimizer
         self.g_optimizer = g_optimizer
